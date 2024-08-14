@@ -1,0 +1,62 @@
+---
+- name: Configure MacOS for Flask application
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Ensure Homebrew is installed
+      stat:
+        path: /usr/local/bin/brew
+      register: homebrew_check
+
+    - name: Install Homebrew if not present
+      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      when: not homebrew_check.stat.exists
+
+    - name: Update Homebrew
+      homebrew:
+        update_homebrew: yes
+
+    - name: Install required packages
+      homebrew:
+        name:
+          - python@3.9
+          - docker
+          - docker-compose
+        state: present
+
+    - name: Ensure Docker is running
+      shell: open -a Docker
+      ignore_errors: yes
+
+    - name: Wait for Docker to start
+      wait_for:
+        timeout: 20
+
+    - name: Create project directory
+      file:
+        path: "{{ lookup('env', 'HOME') }}/devops-project"
+        state: directory
+        mode: '0755'
+
+    - name: Copy project files
+      copy:
+        src: "{{ item }}"
+        dest: "{{ lookup('env', 'HOME') }}/devops-project/"
+      loop:
+        - app.py
+        - requirements.txt
+        - Dockerfile
+        - docker-compose.yml
+        - templates/index.html
+
+    - name: Build and start Docker containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ lookup('env', 'HOME') }}/devops-project"
+        build: always
+        state: present
+
+    - name: Ensure port 5001 is open
+      shell: |
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/local/opt/docker/bin/docker
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --unblock /usr/local/opt/docker/bin/docker
+      ignore_errors: yes
