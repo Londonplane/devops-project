@@ -25,9 +25,7 @@ jobs:
 
     - name: Run tests
       run: |
-        # Add your test commands here
-        echo "Running tests..."
-        # Example: python -m unittest discover tests
+        pytest tests/
 
     - name: Build Docker image
       run: docker build -t flask-app .

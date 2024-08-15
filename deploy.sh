@@ -28,17 +28,18 @@ stop_docker() {
     docker-compose down
 }
 
-# Function to run tests (placeholder for now)
+# Function to run tests
 run_tests() {
     echo "Running tests..."
-    # Add your test commands here
+    pytest tests/
 }
 
 # Function to display usage information
 usage() {
-    echo "Usage: $0 [start|stop]"
+    echo "Usage: $0 [start|stop|test]"
     echo "  start: Start the application (default)"
     echo "  stop: Stop the application"
+    echo "  test: Run tests"
 }
 
 # Main deployment process
@@ -58,6 +59,11 @@ main() {
             echo "Stopping the application..."
             stop_docker
             echo "Application stopped successfully!"
+            ;;
+        test)
+            echo "Running tests..."
+            run_tests
+            echo "Tests completed!"
             ;;
         *)
             usage
