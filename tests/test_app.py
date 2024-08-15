@@ -1,4 +1,10 @@
 import unittest
+import sys
+import os
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app import app
 
 class FlaskAppTests(unittest.TestCase):
@@ -6,12 +12,10 @@ class FlaskAppTests(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True 
 
-    # 检查首页是否返回 200 状态码
     def test_home_status_code(self):
         response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
 
-    # 检查首页是否包含预期的文本
     def test_home_data(self):
         response = self.app.get('/')
         self.assertIn(b'Hello, DevOps World!', response.data)
